@@ -143,6 +143,7 @@ export default async function BlogPostPage({ params }) {
               alt={post.title}
               fill
               priority
+              unoptimized
               className="object-cover"
             />
           </div>

@@ -19,7 +19,7 @@ export default function ProductCard({ product }) {
           src={product.image}
           alt={product.name}
           fill
-          sizes="(max-w-7xl) 25vw, 50vw"
+          unoptimized
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">

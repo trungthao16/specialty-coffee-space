@@ -130,7 +130,7 @@ export default async function ProductDetailPage({ params }) {
                 alt={product.name}
                 fill
                 priority
-                sizes="(max-w-7xl) 50vw, 100vw"
+                unoptimized
                 className="object-cover"
               />
             </div>
