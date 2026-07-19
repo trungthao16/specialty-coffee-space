@@ -71,6 +71,17 @@ connectDB()
     console.warn('MongoDB connection failed. Operating with mock data fallbacks.', err.message);
   });
 
+// Helper to dynamically correct legacy localhost upload links to match current request host
+const fixImageUrl = (url, req) => {
+  if (!url) return url;
+  if (url.includes('localhost:5000')) {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const baseUrl = `${protocol}://${req.get('host')}`;
+    return url.replace(/http:\/\/localhost:5000/g, baseUrl);
+  }
+  return url;
+};
+
 // API Routes
 
 // GET: Products (with optional coffeeType and roastLevel filters)
@@ -85,7 +96,8 @@ app.get('/api/products', async (req, res) => {
 
       const products = await Product.find(query).populate('category').lean();
       if (products && products.length > 0) {
-        return res.json(products);
+        const fixed = products.map(p => ({ ...p, image: fixImageUrl(p.image, req) }));
+        return res.json(fixed);
       }
     } catch (error) {
       console.error('Error fetching products from DB:', error.message);
@@ -109,7 +121,8 @@ app.get('/api/posts', async (req, res) => {
     try {
       const posts = await Post.find({ isPublished: true }).populate('category').sort({ createdAt: -1 }).lean();
       if (posts && posts.length > 0) {
-        return res.json(posts);
+        const fixed = posts.map(p => ({ ...p, coverImage: fixImageUrl(p.coverImage, req) }));
+        return res.json(fixed);
       }
     } catch (error) {
       console.error('Error fetching posts from DB:', error.message);
@@ -126,6 +139,7 @@ app.get('/api/products/:slug', async (req, res) => {
     try {
       const product = await Product.findOne({ slug }).populate('category').lean();
       if (product) {
+        product.image = fixImageUrl(product.image, req);
         return res.json(product);
       }
     } catch (error) {
@@ -148,6 +162,7 @@ app.get('/api/posts/:slug', async (req, res) => {
     try {
       const post = await Post.findOne({ slug, isPublished: true }).populate('category').lean();
       if (post) {
+        post.coverImage = fixImageUrl(post.coverImage, req);
         return res.json(post);
       }
     } catch (error) {
