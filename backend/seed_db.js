@@ -1,28 +1,10 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import Category from './models/Category.js';
+import Post from './models/Post.js';
 import { mockPosts } from './mockData.js';
 
 dotenv.config();
-
-const PostSchema = new mongoose.Schema({
-  title: String,
-  slug: String,
-  excerpt: String,
-  content: String,
-  coverImage: String,
-  author: String,
-  category: {
-    _id: String,
-    name: String,
-    slug: String,
-    description: String,
-    type: String
-  },
-  isPublished: Boolean,
-  createdAt: Date
-}, { collection: 'posts' });
-
-const Post = mongoose.models.Post || mongoose.model('Post', PostSchema);
 
 async function run() {
   const URI = process.env.MONGODB_URI;
@@ -35,18 +17,35 @@ async function run() {
     await mongoose.connect(URI);
     console.log('Connected to MongoDB.');
 
-    // 1. Clear existing posts (to delete test posts "1", "2", etc.)
+    // 1. Ensure blog category exists in the database
+    let category = await Category.findOne({ slug: 'tin-tuc-chia-se' });
+    if (!category) {
+      category = await Category.create({
+        name: 'Tin tức & Chia sẻ',
+        slug: 'tin-tuc-chia-se',
+        description: 'Thông tin, kiến thức về cà phê specialty',
+        type: 'post',
+      });
+      console.log('Created "Tin tức & Chia sẻ" category.');
+    } else {
+      console.log('Found existing category:', category.name);
+    }
+
+    // 2. Clear existing posts
     const deleteResult = await Post.deleteMany({});
     console.log(`Cleared existing posts from DB. Count: ${deleteResult.deletedCount}`);
 
-    // 2. Map posts to exclude _id (or keep it if it is a string) and save
+    // 3. Map posts to set their category field to the category document's ObjectId
     const postsToInsert = mockPosts.map(post => {
       const { _id, ...rest } = post;
-      return rest;
+      return {
+        ...rest,
+        category: category._id, // Assign the correct ObjectId from DB
+      };
     });
 
     const insertResult = await Post.insertMany(postsToInsert);
-    console.log(`Successfully seeded ${insertResult.length} SEO-optimized posts into database!`);
+    console.log(`Successfully seeded ${insertResult.length} SEO-optimized posts into database with correct category references!`);
   } catch (error) {
     console.error('Error during seeding:', error);
   } finally {
