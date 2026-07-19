@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,9 +19,9 @@ async function getPosts() {
 }
 
 export async function generateMetadata() {
-  let title = "Blog Cà Phê - Kiến thức & Chia sẻ Specialty Coffee";
-  let description = "Cập nhật những kiến thức về các phương pháp pha chế V60, Chemex, Aeropress, cùng các câu chuyện về hạt cà phê.";
-  let keywords = "blog cà phê, cách pha chế, v60 pour over, hạt cà phê specialty";
+  let title = "Blog Cà Phê Specialty - Kiến Thức & Mẹo Pha Chế";
+  let description = "Chia sẻ kiến thức pha chế cà phê V60 Pour Over, Espresso, hạt Arabica, Robusta Honey Gia Lai và quy trình sơ chế cà phê specialty.";
+  let keywords = "blog cà phê, kiến thức cà phê, cách pha v60, sơ chế honey";
 
   try {
     const res = await fetch(`${API_URL}/api/seo?path=/blog`, { cache: 'no-store' });
@@ -54,14 +55,19 @@ export async function generateMetadata() {
 export default async function BlogPage() {
   const posts = await getPosts();
 
+  const breadcrumbItems = [
+    { name: 'Blog', href: '/blog' },
+  ];
+
   return (
-    <div className="bg-stone-950 min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Header */}
+    <div className="bg-stone-950 min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Header with Breadcrumbs & Action Button */}
         <div className="border-b border-stone-900 pb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+          <div className="space-y-2">
+            <Breadcrumbs items={breadcrumbItems} />
             <h1 className="text-4xl font-serif font-black text-stone-100">Blog Cà Phê</h1>
-            <p className="text-stone-400 mt-2">Nơi chia sẻ kiến thức, mẹo pha chế và câu chuyện xoay quanh hạt cà phê đặc sản.</p>
+            <p className="text-stone-400 text-sm">Nơi chia sẻ kiến thức, mẹo pha chế và câu chuyện xoay quanh hạt cà phê đặc sản.</p>
           </div>
           <Link
             href="/blog/viet-bai"
